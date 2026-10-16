@@ -163,8 +163,11 @@ async def google_auth(
     summary="Get Google OAuth Authorization URL",
     description="Generates Google OAuth 2.0 consent URL for web browser redirect flow.",
 )
-async def google_auth_url(state: str | None = Query(None, description="Optional CSRF state parameter")):
-    url = GoogleAuthService.get_authorization_url(state=state)
+async def google_auth_url(
+    state: str | None = Query(None, description="Optional CSRF state parameter"),
+    redirect_uri: str | None = Query(None, description="Optional custom redirect URI"),
+):
+    url = GoogleAuthService.get_authorization_url(state=state, redirect_uri=redirect_uri)
     return GoogleAuthUrlResponse(authorization_url=url)
 
 
@@ -177,9 +180,10 @@ async def google_auth_url(state: str | None = Query(None, description="Optional 
 async def google_auth_callback(
     code: str = Query(..., description="Authorization code from Google"),
     state: str | None = Query(None, description="CSRF state parameter"),
+    redirect_uri: str | None = Query(None, description="Optional custom redirect URI used during authorization"),
     db: Annotated[AsyncSession, Depends(get_db)] = None,
 ):
-    token_response = await GoogleAuthService.exchange_code_for_tokens(code)
+    token_response = await GoogleAuthService.exchange_code_for_tokens(code, redirect_uri=redirect_uri)
     id_token_str = token_response.get("id_token")
     if not id_token_str:
         raise HTTPException(

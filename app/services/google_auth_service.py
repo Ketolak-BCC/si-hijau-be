@@ -77,7 +77,7 @@ class GoogleAuthService:
             ) from err
 
     @staticmethod
-    def get_authorization_url(state: str | None = None) -> str:
+    def get_authorization_url(state: str | None = None, redirect_uri: str | None = None) -> str:
         """
         Generates the Google OAuth 2.0 authorization URL for browser redirect flow.
         """
@@ -90,7 +90,7 @@ class GoogleAuthService:
         base_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
             "client_id": settings.GOOGLE_CLIENT_ID,
-            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "redirect_uri": redirect_uri or settings.GOOGLE_REDIRECT_URI,
             "response_type": "code",
             "scope": "openid email profile",
             "access_type": "offline",

@@ -41,12 +41,22 @@ app = FastAPI(
 )
 
 if settings.CORS_ORIGINS:
+    allow_origins = settings.CORS_ORIGINS
+    allow_origin_regex = None
+    if "*" in allow_origins:
+        # Browsers reject Access-Control-Allow-Origin: * when allow_credentials=True.
+        # Regex allows any HTTP/HTTPS origin while reflecting origin and supporting credentials.
+        allow_origins = []
+        allow_origin_regex = r"^https?://.*"
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=allow_origins,
+        allow_origin_regex=allow_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
 
 
